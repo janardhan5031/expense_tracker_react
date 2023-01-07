@@ -1,0 +1,26 @@
+
+.container{
+    margin:4.5rem auto 0;
+    padding: 1.5rem 1rem;
+
+    background-color: white;
+    border: 1px solid gray;
+    border-radius:0.5rem;
+    width:20rem;
+    display:flex;
+    flex-direction:column;
+
+    font-size:medium;
+    gap:1rem;
+
+}
+
+.authContainer{
+    background-image: url('../../assets/login_bg.png');
+    height: 100vh;
+    font-size: 50px;
+
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white
+}
