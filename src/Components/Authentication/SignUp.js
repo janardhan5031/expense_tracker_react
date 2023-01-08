@@ -1,5 +1,6 @@
 import { useState, useReducer, useEffect } from 'react';
 import { FloatingLabel, Form, Stack, Button } from 'react-bootstrap';
+import axios from 'axios';
 
 function emailReducerFn(prev, curr) {
     const email = curr.val.trim();
@@ -10,7 +11,7 @@ function emailReducerFn(prev, curr) {
     if (email.includes('@') && email.includes('.com')) {
         return { value: email, isValid: true }
     }
-    else return { value: email, isValid: false,msg:'please provide corect email address' }
+    else return { value: email, isValid: false,msg:'please provide correct email address' }
 }
 
 function passwordReducer(prev, curr) {
@@ -25,10 +26,11 @@ function passwordReducer(prev, curr) {
 }
 
 const SignUp = () => {
-    const [email, dispatchEmail] = useReducer(emailReducerFn, { value: '', isValid: false });
-    const [password, dispatchPassword] = useReducer(passwordReducer, { value: '', isValid: false });
-    const [confirmPassword, dispatchConfirmPassword] = useReducer(passwordReducer, { value: '', isValid: false });
+    const [email, dispatchEmail] = useReducer(emailReducerFn, { value:'', msg:'please provide correct email address', isValid: false });
+    const [password, dispatchPassword] = useReducer(passwordReducer, { value:'',msg: 'must be include \'@\' & atleast 6 charectors', isValid: false });
+    const [confirmPassword, dispatchConfirmPassword] = useReducer(passwordReducer, { value:'',msg: 'must be include \'@\' & atleast 6 charectors', isValid: false });
 
+    const [onStarting, setOnStarting] = useState(true);
     const [isFormValid, setIsFormValid] = useState(false);
 
     useEffect(() => {
@@ -47,27 +49,41 @@ const SignUp = () => {
         dispatchConfirmPassword({ val: e.target.value,from:'' })
     }
 
-    function submitHandler(e) {
+    async function submitHandler(e) {
         e.preventDefault();
-
+        setOnStarting(false);
         
         if (isFormValid) {
             console.log(email.value, password.value, confirmPassword.value)
-            
-            dispatchEmail({ val: '',from:'SUBMIT_HANDLER' });
-            dispatchPassword({ val: '',from:'SUBMIT_HANDLER' });
-            dispatchConfirmPassword({ val: '', from: 'SUBMIT_HANDLER' });
-            setIsFormValid(false);
 
-            e.target.email.value = '';
-            e.target.password.value = '';
-            e.target.confirmPassword.value = '';
+            try {
+                const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.REACT_APP_API_KEY}`, {
+                    email: email.value,
+                    password:password.value
+                })
+                // console.log(response);
+
+                window.alert('user successfully logged in ');
+                
+                // clearing the value form form and state objects as well
+                dispatchEmail({ val: '',from:'SUBMIT_HANDLER' });
+                dispatchPassword({ val: '',from:'SUBMIT_HANDLER' });
+                dispatchConfirmPassword({ val: '', from: 'SUBMIT_HANDLER' });
+                setIsFormValid(false);
+                setOnStarting(true);
+    
+                e.target.email.value = '';
+                e.target.password.value = '';
+                e.target.confirmPassword.value = '';
+            } catch (err) {
+                // console.log(err);
+                window.alert(err.response.data.error.message);
+            }
+            
         }
          else if (password.value !== confirmPassword.value) {
             window.alert('password and confirm password must be matched')
-        } else {
-            window.alert('please provide all fields')
-        }
+        } 
 
 
     }
@@ -85,7 +101,7 @@ const SignUp = () => {
                             type="email"
                             placeholder="email"
                             onChange={emailHandler}
-                            isInvalid={!email.isValid}
+                            isInvalid={onStarting ? !onStarting : !email.isValid}
                         />
                         <Form.Control.Feedback type="invalid" >{ email.msg}</Form.Control.Feedback>
 
@@ -96,7 +112,7 @@ const SignUp = () => {
                             type="password"
                             placeholder="Password"
                             onChange={passwordHandler}
-                            isInvalid={!password.isValid}
+                            isInvalid={onStarting ? !onStarting: !password.isValid}
                         />
                         <Form.Control.Feedback type="invalid" >{ password.msg}</Form.Control.Feedback>
                     </FloatingLabel>
@@ -105,7 +121,7 @@ const SignUp = () => {
                             type="password"
                             placeholder="confirmPassword"
                             onChange={confirmPasswordHandler}
-                            isInvalid={!confirmPassword.isValid}
+                            isInvalid={onStarting ? !onStarting : !confirmPassword.isValid}
                         />
                         <Form.Control.Feedback type="invalid" >{ confirmPassword.msg}</Form.Control.Feedback>
                     </FloatingLabel>
