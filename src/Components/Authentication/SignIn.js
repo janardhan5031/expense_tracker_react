@@ -1,7 +1,9 @@
-import { useState, useReducer, useEffect } from 'react';
+import { useState, useReducer, useEffect, useContext } from 'react';
 import { FloatingLabel, Form, Stack, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
+
+import AuthContext from '../Store/AuthContext/AuthContext';
+import { Link } from 'react-router-dom';
 
 function emailReducerFn(prev, curr) {
     const email = curr.val.trim();
@@ -26,22 +28,20 @@ function passwordReducer(prev, curr) {
     return { value: password, isValid: false, msg: 'must be include \'@\' & atleast 6 charectors' }
 }
 
-const SignUp = () => {
-
-    console.log('sign up page')
-
+const SignIn = () => {
     const [email, dispatchEmail] = useReducer(emailReducerFn, { value: '', msg: 'please provide correct email address', isValid: false });
     const [password, dispatchPassword] = useReducer(passwordReducer, { value: '', msg: 'must be include \'@\' & atleast 6 charectors', isValid: false });
-    const [confirmPassword, dispatchConfirmPassword] = useReducer(passwordReducer, { value: '', msg: 'must be include \'@\' & atleast 6 charectors', isValid: false });
 
     const [onStarting, setOnStarting] = useState(true);
     const [isFormValid, setIsFormValid] = useState(false);
 
+    const AuthCtx = useContext(AuthContext)
+
     useEffect(() => {
-        if (email.isValid && password.isValid && confirmPassword.isValid && password.value === confirmPassword.value) {
+        if (email.isValid && password.isValid) {
             setIsFormValid(true)
         }
-    }, [email, password, confirmPassword])
+    }, [email, password])
 
     function emailHandler(e) {
         dispatchEmail({ val: e.target.value, from: '' })
@@ -49,54 +49,49 @@ const SignUp = () => {
     function passwordHandler(e) {
         dispatchPassword({ val: e.target.value, from: '' })
     }
-    function confirmPasswordHandler(e) {
-        dispatchConfirmPassword({ val: e.target.value, from: '' })
-    }
 
     async function submitHandler(e) {
         e.preventDefault();
         setOnStarting(false);
 
         if (isFormValid) {
-            console.log(email.value, password.value, confirmPassword.value)
+            console.log(email.value, password.value)
 
             try {
-                const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.REACT_APP_API_KEY}`, {
+                const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.REACT_APP_API_KEY}`, {
                     email: email.value,
                     password: password.value
                 })
-                // console.log(response);
+                console.log(response);
 
-                window.alert('user successfully signed up ');
+                window.alert('user successfully logged in ');
+
+                AuthCtx.userLoggedIn(response.data.idToken, response.data.localId);
 
                 // clearing the value form form and state objects as well
                 dispatchEmail({ val: '', from: 'SUBMIT_HANDLER' });
                 dispatchPassword({ val: '', from: 'SUBMIT_HANDLER' });
-                dispatchConfirmPassword({ val: '', from: 'SUBMIT_HANDLER' });
 
+                // return to original form states
                 setIsFormValid(false);
                 setOnStarting(true);
 
                 e.target.email.value = '';
                 e.target.password.value = '';
-                e.target.confirmPassword.value = '';
+
             } catch (err) {
-                // console.log(err);
+                console.log(err);
                 window.alert(err.response.data.error.message);
             }
 
         }
-        else if (password.value !== confirmPassword.value) {
-            window.alert('password and confirm password must be matched')
-        }
-
 
     }
 
     return (
         <>
             <Stack className='m-auto'>
-                <h2 className='text-centered'>SignUp</h2>
+                <h2 className='text-centered'>SignIn</h2>
             </Stack>
 
             <Form noValidate onSubmit={submitHandler}>
@@ -121,27 +116,19 @@ const SignUp = () => {
                         />
                         <Form.Control.Feedback type="invalid" >{password.msg}</Form.Control.Feedback>
                     </FloatingLabel>
-                    <FloatingLabel controlId="confirmPassword" label="Confirm Password">
-                        <Form.Control
-                            type="password"
-                            placeholder="confirmPassword"
-                            onChange={confirmPasswordHandler}
-                            isInvalid={onStarting ? !onStarting : !confirmPassword.isValid}
-                        />
-                        <Form.Control.Feedback type="invalid" >{confirmPassword.msg}</Form.Control.Feedback>
-                    </FloatingLabel>
+
                     <Button type='submit' variant='primary'>Submit</Button>
                 </Stack>
             </Form>
 
-
-            <Link to={'/authentication/sign_in'} className='m-0 p-0'>
-                <Button type='button' variant='outline-secondary' className='mt-3' style={{width:'100%'}}>Have an account? Login</Button>
+            <Link to={'/authentication/sign_up'}>
+                <Button type='button' variant='outline-secondary' className='mt-3' style={{width:'100%'}}>
+                    Don't have an account? Sign up
+                </Button>
             </Link>
-
         </>
 
     )
 }
 
-export default SignUp;
+export default SignIn;
