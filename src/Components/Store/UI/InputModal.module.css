@@ -14,13 +14,3 @@
     gap:1rem;
 
 }
-
-.authContainer{
-    background-image: url('../../assets/login_bg.png');
-    height: 100vh;
-    font-size: 50px;
-
-    background-size: cover;
-    background-repeat: no-repeat;
-    color: white
-}

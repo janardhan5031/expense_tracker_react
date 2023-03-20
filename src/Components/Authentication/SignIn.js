@@ -1,6 +1,7 @@
 import { useState, useReducer, useEffect, useContext } from 'react';
 import { FloatingLabel, Form, Stack, Button } from 'react-bootstrap';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 import AuthContext from '../Store/AuthContext/AuthContext';
 import { Link } from 'react-router-dom';
@@ -35,7 +36,9 @@ const SignIn = () => {
     const [onStarting, setOnStarting] = useState(true);
     const [isFormValid, setIsFormValid] = useState(false);
 
-    const AuthCtx = useContext(AuthContext)
+    const AuthCtx = useContext(AuthContext);
+
+    const navigation = useNavigate();
 
     useEffect(() => {
         if (email.isValid && password.isValid) {
@@ -66,7 +69,13 @@ const SignIn = () => {
 
                 window.alert('user successfully logged in ');
 
-                AuthCtx.userLoggedIn(response.data.idToken, response.data.localId);
+                AuthCtx.userLoggedIn({
+                    from:'LOGIN_MODULE',
+                    token: response.data.idToken,
+                    userId: response.data.localId,
+                });
+
+                navigation('/');
 
                 // clearing the value form form and state objects as well
                 dispatchEmail({ val: '', from: 'SUBMIT_HANDLER' });

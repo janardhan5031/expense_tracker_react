@@ -81,7 +81,7 @@ const SignUp = () => {
                 e.target.password.value = '';
                 e.target.confirmPassword.value = '';
             } catch (err) {
-                // console.log(err);
+                console.log(err);
                 window.alert(err.response.data.error.message);
             }
 

@@ -3,11 +3,16 @@ import react from 'react';
 
 
 const context = {
-    token: '',
     isLogin: false,
+    isProfileCompleted:false,
+    token: '',
     userId:'',
+    name: '',
+    email: '',
+    profilePicture: '',
     userLoggedIn : (token, userId) => { },
-    userLoggedOut : ()=>{}
+    userLoggedOut: () => { },
+    update_user_profile:(data)=>{}
 }
 
 const AuthContext = react.createContext(context);

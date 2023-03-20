@@ -1,0 +1,16 @@
+
+.profile_btn{
+    color: rgba(34,11,254,255);
+    cursor: pointer;
+}
+
+.profile_btn :hover{
+    color: white;
+    cursor: pointer;
+}
+
+.container_btn{
+    background-color: rgba(250, 165, 150, 0.76);
+    border-radius: 2rem;
+    color: white;
+}
