@@ -70,7 +70,8 @@ const SignIn = () => {
                 window.alert('user successfully logged in ');
 
                 AuthCtx.userLoggedIn({
-                    from:'LOGIN_MODULE',
+                    from: 'LOGIN_MODULE',
+                    name:response.data.displayName,
                     token: response.data.idToken,
                     userId: response.data.localId,
                 });

@@ -12,7 +12,7 @@ const LoginStatus = () => {
     }
     function SignOutHandler(e) {    
         AuthCtx.userLoggedOut();
-        navigation('/');
+        navigation('/authentication/sign_in')
     }
 
     // console.log('login status ==> ', AuthCtx.isLogin)

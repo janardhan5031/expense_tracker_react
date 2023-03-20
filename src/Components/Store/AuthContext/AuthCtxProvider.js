@@ -24,13 +24,13 @@ const initalValue = result ? {
 
 const userCtxReducer = (prev, curr) => {
     if (curr.from === 'LOGIN_MODULE') {
-        return { ...prev, isLogin: true, isProfileCompleted: false, token: curr.token, useId: curr.userId };
+        return { ...prev, isLogin: true, isProfileCompleted: curr.name?true:false, token: curr.token, useId: curr.userId };
     }
     else if (curr.from === 'LOGOUT') {
         return { isLogin: false, isProfileCompleted: false, token: '', userId: '', email: '', name: '', profilePicture: '' };
     }
     else if (curr.from === 'AUTH_CTX') {
-        return { ...prev, email: curr.email, name: curr.name, profilePicture: curr.profilePicture}
+        return { ...prev, email: curr.email, name: curr.name, profilePicture: curr.profilePicture, isProfileCompleted:curr.isProfileCompleted}
     } else {
         return {...prev,name:curr.name, profilePicture:curr.profilePicture, isProfileCompleted:true}
     }
@@ -59,7 +59,7 @@ const AuthContextProvider = (props) => {
                         email: data.email,
                         profilePicture: data.photoUrl
                     }));
-                    setUserCtx({ from: 'AUTH_CTX', email: data.email, name: data.displayName, profilePicture: data.photoUrl });
+                    setUserCtx({ from: 'AUTH_CTX', email: data.email, name: data.displayName, profilePicture: data.photoUrl , isProfileCompleted:data.displayName?true:false});
                 }
                 catch (err) {
                     console.log(err)
