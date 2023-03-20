@@ -1,7 +1,7 @@
 import { useState, useReducer, useEffect, useContext } from 'react';
 import { FloatingLabel, Form, Stack, Button } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import AuthContext from '../Store/AuthContext/AuthContext';
 import { Link } from 'react-router-dom';
@@ -33,6 +33,9 @@ const SignIn = () => {
     const [email, dispatchEmail] = useReducer(emailReducerFn, { value: '', msg: 'please provide correct email address', isValid: false });
     const [password, dispatchPassword] = useReducer(passwordReducer, { value: '', msg: 'must be include \'@\' & atleast 6 charectors', isValid: false });
 
+    const params = useParams();
+    // console.log(params)
+
     const [onStarting, setOnStarting] = useState(true);
     const [isFormValid, setIsFormValid] = useState(false);
 
@@ -57,10 +60,10 @@ const SignIn = () => {
         e.preventDefault();
         setOnStarting(false);
 
-        if (isFormValid) {
-            console.log(email.value, password.value)
+        try {
+            if (isFormValid) {
+                console.log(email.value, password.value)
 
-            try {
                 const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.REACT_APP_API_KEY}`, {
                     email: email.value,
                     password: password.value
@@ -89,22 +92,52 @@ const SignIn = () => {
                 e.target.email.value = '';
                 e.target.password.value = '';
 
-            } catch (err) {
-                console.log(err);
-                window.alert(err.response.data.error.message);
             }
-
+        } catch (err) {
+            console.log(err);
+            window.alert(err.response.data.error.message);
         }
+    }
 
+    const forgotPasswordHandler = async (e) => {
+        e.preventDefault();
+        console.log('forgot submited')
+        setOnStarting(false);
+        try {
+            if (email.isValid) {
+                // console.log(email.value)
+    
+                const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.REACT_APP_API_KEY}`, {
+                    requestType: 'PASSWORD_RESET',
+                    email:email.value
+                })
+
+                console.log(response);
+
+                window.alert('successfully sent password recovery mail')
+
+                dispatchEmail({ val: '', from: 'SUBMIT_HANDLER' });
+                setOnStarting(true);
+                e.target.email.value = '';
+            }
+        }
+        catch (err) {
+            console.log(err)
+            window.alert('something went wrong')
+        }
+    }
+
+    const forgotPasswordRedirection = () => {
+        navigation('/authentication/forgot_password')
     }
 
     return (
         <>
             <Stack className='m-auto'>
-                <h2 className='text-centered'>SignIn</h2>
+                <h2 className='text-centered'>{ params.auth ==='sign_in' ? 'SignIn' : 'Forgot Password'}</h2>
             </Stack>
 
-            <Form noValidate onSubmit={submitHandler}>
+            <Form noValidate onSubmit={ params.auth==='sign_in' ? submitHandler: forgotPasswordHandler }>
                 <Stack gap={2}>
                     <FloatingLabel controlId="email" label="Email address">
                         <Form.Control
@@ -116,26 +149,35 @@ const SignIn = () => {
                         <Form.Control.Feedback type="invalid" >{email.msg}</Form.Control.Feedback>
 
                     </FloatingLabel>
-
-                    <FloatingLabel controlId="password" label="Password">
-                        <Form.Control
-                            type="password"
-                            placeholder="Password"
-                            onChange={passwordHandler}
-                            isInvalid={onStarting ? !onStarting : !password.isValid}
-                        />
-                        <Form.Control.Feedback type="invalid" >{password.msg}</Form.Control.Feedback>
-                    </FloatingLabel>
+                    {
+                        params.auth ==='sign_in' && <>
+                            <FloatingLabel controlId="password" label="Password">
+                                <Form.Control
+                                    type="password"
+                                    placeholder="Password"
+                                    onChange={passwordHandler}
+                                    isInvalid={onStarting ? !onStarting : !password.isValid}
+                                />
+                                <Form.Control.Feedback type="invalid" >{password.msg}</Form.Control.Feedback>
+                            </FloatingLabel>
+                            <div>
+                                <p style={{ textAlign: 'end', cursor: 'pointer', color: 'firebrick' }}
+                                    onClick={forgotPasswordRedirection}
+                                >forgot password?</p>
+                            </div>
+                        </>
+                    }
 
                     <Button type='submit' variant='primary'>Submit</Button>
                 </Stack>
             </Form>
-
-            <Link to={'/authentication/sign_up'}>
-                <Button type='button' variant='outline-secondary' className='mt-3' style={{width:'100%'}}>
-                    Don't have an account? Sign up
-                </Button>
-            </Link>
+            {
+                params.auth ==='sign_in' && <Link to={'/authentication/sign_up'}>
+                    <Button type='button' variant='outline-secondary' className='mt-3' style={{width:'100%'}}>
+                        Don't have an account? Sign up
+                    </Button>
+                </Link>
+            }
         </>
 
     )
