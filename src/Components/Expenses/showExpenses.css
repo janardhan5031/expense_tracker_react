@@ -1,0 +1,12 @@
+
+ul{
+    padding: 0;
+    list-style: none;
+}
+
+.expense_list_container{
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid  salmon;
+    margin: 0.5rem 0;
+}
