@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect,useContext } from "react";
+import { useReducer, useState, useEffect } from "react";
 
 import axios from 'axios';
 
@@ -6,7 +6,9 @@ import './ProfileUpdate.css';
 
 import InputModal from "../Store/UI/InputModal";
 import { Form, Stack, Button, FloatingLabel } from 'react-bootstrap';
-import AuthContext from "../Store/AuthContext/AuthContext";
+
+import { useSelector, useDispatch } from "react-redux";
+import { authActions } from "../Store/Redux_store/authReducer";
 
 const nameReducer = (prev, curr) => {
     const name = curr.val.trim();
@@ -31,10 +33,15 @@ const photoReducer = (prev, curr) => {
 }
 
 const ProfileStatus = () => {
-    const AuthCtx = useContext(AuthContext)
 
-    const [name, dispatchName] = useReducer(nameReducer, { value: AuthCtx.name, isValid: true });
-    const [photoURL, dispatchPhotoURL] = useReducer(photoReducer, { value: AuthCtx.profilePicture, isValid: true });
+    const dispatch = useDispatch();
+    const user = useSelector(state => state.auth.user);
+    const auth = useSelector(state => state.auth.auth);
+
+    console.log(user)
+
+    const [name, dispatchName] = useReducer(nameReducer, { value: user.name, isValid: true });
+    const [photoURL, dispatchPhotoURL] = useReducer(photoReducer, { value: user.profilePicture, isValid: true });
 
     const [isFromValid, setIsFormValid] = useState(false);
 
@@ -56,7 +63,7 @@ const ProfileStatus = () => {
         console.log('email handler clicked')
         try {
             const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.REACT_APP_API_KEY}`, {
-                idToken: AuthCtx.token,
+                idToken: auth.token,
                 requestType:'VERIFY_EMAIL'
             })
     
@@ -80,7 +87,7 @@ const ProfileStatus = () => {
             // sending the request to server (firebase server)
             try {
                 const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:update?key=${process.env.REACT_APP_API_KEY}`, {
-                    idToken:AuthCtx.token,
+                    idToken:auth.token,
                     displayName: name.value,
                     photoUrl: photoURL.value,
                     returnSecureToken:true
@@ -88,13 +95,18 @@ const ProfileStatus = () => {
 
                 // console.log(response.data);
 
-                AuthCtx.update_user_profile({
-                    from:'UPDATE_MODULE',
-                    userId: response.data.localId,
+                // AuthCtx.update_user_profile({
+                //     from:'UPDATE_MODULE',
+                //     userId: response.data.localId,
+                //     name: response.data.displayName,
+                //     profilePicture: response.data.photoUrl,
+                //     email: response.data.email
+                // });
+
+                dispatch(authActions.updateUserDetails({
                     name: response.data.displayName,
-                    profilePicture: response.data.photoUrl,
-                    email: response.data.email
-                });
+                    profilePicture:response.data.photoUrl
+                }))
 
                 // restoring the states to back
                 dispatchName({ val: '', from: 'SUBMIT_HANDLER' });
@@ -126,9 +138,9 @@ const ProfileStatus = () => {
             <div className="profile_pic">
                 <img src="https://wallpapers.com/images/featured/i0gxj0j9def43771.jpg" alt="profile_pic"></img>
             </div>
-            <div><h4>{AuthCtx.name}</h4></div>
+            <div><h4>{user.name}</h4></div>
             <div className='modal_card' >
-                <p>{AuthCtx.email}</p>
+                <p>{user.email}</p>
                 <Button variant='primary' onClick={verifyEmailHandler}>Verify Email</Button>
             </div>
         </InputModal>

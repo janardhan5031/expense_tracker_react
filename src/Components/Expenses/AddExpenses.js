@@ -2,8 +2,11 @@ import { Form, Button, Stack } from "react-bootstrap";
 import InputModal from "../Store/UI/InputModal";
 import ShowExpenseList from "./showExpenseList";
 
-import { useContext , useState} from 'react';
-import ExpenseContext from '../Store/ExpenseContext/ExpenseContext';
+import { useState } from 'react';
+import axios from "axios";
+
+import { useDispatch, useSelector } from "react-redux";
+import { expenseActions } from "../Store/Redux_store/expenseReducer";
 
 const styling = {
     postion: 'relative',
@@ -17,16 +20,17 @@ const AddExpenses = () => {
     const [updateExp, setUpdateExp] = useState({isUpdate:false, id:undefined});
     const [formValues, setFormValues] = useState({ expense: '', description: '' });
 
-    const Ctx = useContext(ExpenseContext)
+    const expenseList = useSelector((state) => state.expense.expenseList);
+
+    const dispatch = useDispatch();
 
     const updateExpOnclick = (id)=>{
         setUpdateExp({isUpdate:true,id});
 
-        const filteredExp = Ctx.expenseList.filter((exp) => {
-            return id== exp.id
+        const filteredExp = expenseList.filter((exp) => {
+            return Number(id)=== exp.id
         })
-        setFormValues(filteredExp[0])
-
+        setFormValues({expense:filteredExp[0].expense, description:filteredExp[0].description})
     }
 
     function expenseChangeHandler(e) {
@@ -40,10 +44,10 @@ const AddExpenses = () => {
         })
     }
 
-    const formSubmitHandler = (e) =>{
+    const formSubmitHandler = async (e) =>{
         e.preventDefault();
 
-        const expense = e.target.expense.value;
+        const expense = Number(e.target.expense.value);
         const description = e.target.description.value;
         const expense_type = e.target.expense_type.value;
         // console.log(expense,description, expense_type)
@@ -51,17 +55,40 @@ const AddExpenses = () => {
         if (updateExp.isUpdate) {
             
             // console.log('updated expense')
+            try {
+                
+                const key = expenseList.filter((exp) => exp.id === updateExp.id)[0].key;
+                    
+                const response = await axios.patch(`https://expense-tracker-ee313-default-rtdb.firebaseio.com/expenses/${key}.json`, {
+                    expense, description, type:expense_type
+                })
 
-            Ctx.updateExpense(updateExp.id, {expense,description, expense_type})
+                // console.log(response)    
+                if (response.status === 200) {
+                    dispatch(expenseActions.updateExpense({key, expense, description, type:expense_type}))
+                }
+
+            }catch(err){    
+                console.log(err)
+            }
 
             setUpdateExp((curr) => {
                 return { isUpdate: !curr.isUpdate, id: undefined }
             })
         } else {
-            Ctx.addExpense({ expense, description, type: expense_type })
-            
+            try {
+                const response = await axios.post(`https://expense-tracker-ee313-default-rtdb.firebaseio.com/expenses.json`, {
+                    expense, description, type: expense_type, id: Date.now()
+                })
+                // console.log(response);
+    
+                dispatch(expenseActions.addExpense([{ expense, description, type: expense_type, id:Date.now(), key:response.data.name }]))
+                
+            } catch (err) {
+                console.log(err)
+            }            
         }
-
+        
         setFormValues({expense:'',description:''})    
 
     }
@@ -76,7 +103,7 @@ const AddExpenses = () => {
                 <Stack gap={2} >
                     <Form.Control
                         value={formValues.expense}
-                        type='text'
+                        type='number'
                         name="expense"
                         placeholder="Enter your Expense"
                         onChange={expenseChangeHandler}

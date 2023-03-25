@@ -67,7 +67,10 @@ const SignUp = () => {
                 })
                 // console.log(response);
 
-                window.alert('user successfully signed up ');
+                if (response.status === 200) {
+                    
+                    window.alert('user successfully signed up ');
+                }
 
                 // clearing the value form form and state objects as well
                 dispatchEmail({ val: '', from: 'SUBMIT_HANDLER' });

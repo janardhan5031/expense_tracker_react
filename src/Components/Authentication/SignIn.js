@@ -1,10 +1,11 @@
-import { useState, useReducer, useEffect, useContext } from 'react';
+import { useState, useReducer, useEffect } from 'react';
 import { FloatingLabel, Form, Stack, Button } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 
-import AuthContext from '../Store/AuthContext/AuthContext';
-import { Link } from 'react-router-dom';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { authActions } from '../Store/Redux_store/authReducer';
 
 function emailReducerFn(prev, curr) {
     const email = curr.val.trim();
@@ -39,7 +40,9 @@ const SignIn = () => {
     const [onStarting, setOnStarting] = useState(true);
     const [isFormValid, setIsFormValid] = useState(false);
 
-    const AuthCtx = useContext(AuthContext);
+    const dispatch = useDispatch();
+    const auth = useSelector((state) => state.auth.auth);
+    console.log(auth)
 
     const navigation = useNavigate();
 
@@ -72,12 +75,18 @@ const SignIn = () => {
 
                 window.alert('user successfully logged in ');
 
-                AuthCtx.userLoggedIn({
-                    from: 'LOGIN_MODULE',
-                    name:response.data.displayName,
+                dispatch(authActions.userLoggedIn({
                     token: response.data.idToken,
-                    userId: response.data.localId,
-                });
+                    name: response.data.displayName ? response.data.displayName : '',
+                    userId: response.data.localId
+                }))
+
+                // AuthCtx.userLoggedIn({
+                //     from: 'LOGIN_MODULE',
+                //     name: response.data.displayName,
+                //     token: response.data.idToken,
+                //     userId: response.data.localId,
+                // });
 
                 navigation('/');
 
@@ -106,10 +115,10 @@ const SignIn = () => {
         try {
             if (email.isValid) {
                 // console.log(email.value)
-    
+
                 const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.REACT_APP_API_KEY}`, {
                     requestType: 'PASSWORD_RESET',
-                    email:email.value
+                    email: email.value
                 })
 
                 console.log(response);
@@ -134,10 +143,10 @@ const SignIn = () => {
     return (
         <>
             <Stack className='m-auto'>
-                <h2 className='text-centered'>{ params.auth ==='sign_in' ? 'SignIn' : 'Forgot Password'}</h2>
+                <h2 className='text-centered'>{params.auth === 'sign_in' ? 'SignIn' : 'Forgot Password'}</h2>
             </Stack>
 
-            <Form noValidate onSubmit={ params.auth==='sign_in' ? submitHandler: forgotPasswordHandler }>
+            <Form noValidate onSubmit={params.auth === 'sign_in' ? submitHandler : forgotPasswordHandler}>
                 <Stack gap={2}>
                     <FloatingLabel controlId="email" label="Email address">
                         <Form.Control
@@ -150,7 +159,7 @@ const SignIn = () => {
 
                     </FloatingLabel>
                     {
-                        params.auth ==='sign_in' && <>
+                        params.auth === 'sign_in' && <>
                             <FloatingLabel controlId="password" label="Password">
                                 <Form.Control
                                     type="password"
@@ -172,8 +181,8 @@ const SignIn = () => {
                 </Stack>
             </Form>
             {
-                params.auth ==='sign_in' && <Link to={'/authentication/sign_up'}>
-                    <Button type='button' variant='outline-secondary' className='mt-3' style={{width:'100%'}}>
+                params.auth === 'sign_in' && <Link to={'/authentication/sign_up'}>
+                    <Button type='button' variant='outline-secondary' className='mt-3' style={{ width: '100%' }}>
                         Don't have an account? Sign up
                     </Button>
                 </Link>

@@ -1,16 +1,15 @@
-import { useContext } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
-import { Nav, Navbar, Stack, NavDropdown } from "react-bootstrap";
+import { Nav, Navbar, Stack, NavDropdown, Button } from "react-bootstrap";
 import userInterface from '../../assets/userInterface_bg.png';
 import Profile from "../UserProfile/Profile";
 
 import UserAuth from '../Authentication/UserAuth';
 import ProfileStatus from '../UserProfile/ProfileUpdate';
 import LoginStatus from '../Authentication/LoginStatus';
-import AuthContext from '../Store/AuthContext/AuthContext';
 import AddExpenses from '../Expenses/AddExpenses';
 
+import { useSelector } from 'react-redux';
 
 const layOutStyle = {
     backgroundImage: `url(${userInterface})`,
@@ -21,7 +20,10 @@ const layOutStyle = {
 
 const LayOut = () => {
 
-    const AuthCtx = useContext(AuthContext);
+    const auth = useSelector((state) => state.auth.auth)
+    const user = useSelector((state) => state.auth.user)
+
+    // console.log(totalExpenses)
 
     // console.log(AuthCtx)
 
@@ -34,24 +36,25 @@ const LayOut = () => {
                     <Navbar.Collapse id="responsive-navbar-nav">
                         <Nav className="me-auto">
                             {
-                                AuthCtx.isLogin && <><Nav.Link as={Link} to='/user_profile' >Profile</Nav.Link>
-                                    <Nav.Link as={ Link} to='/add_expenses' >Add Expense</Nav.Link>
-                                <NavDropdown title="Dropdown" id="collasible-nav-dropdown">
-                                    <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.2">
-                                        Another action
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="#action/3.4">
-                                        Separated link
-                                    </NavDropdown.Item>
-                                </NavDropdown> </>
+                                auth.isLogin && <><Nav.Link as={Link} to='/user_profile' >Profile</Nav.Link>
+                                    <Nav.Link as={Link} to='/add_expenses' >Add Expense</Nav.Link>
+                                    <NavDropdown title="Dropdown" id="collasible-nav-dropdown">
+                                        <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                                        <NavDropdown.Item href="#action/3.2">
+                                            Another action
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+                                        <NavDropdown.Divider />
+                                        <NavDropdown.Item href="#action/3.4">
+                                            Separated link
+                                        </NavDropdown.Item>
+                                    </NavDropdown> </>
                             }
                         </Nav>
                         <Nav>
                             <Stack direction='horizontal' gap={3}>
-                                { AuthCtx.isLogin && !AuthCtx.isProfileCompleted && <Profile />}
+                                {auth.isLogin && !auth.isProfileCompleted && <Profile />}
+                                { user.isPremiumUser && <Button>Premium</Button>}
                                 <LoginStatus />
                             </Stack>
                         </Nav>

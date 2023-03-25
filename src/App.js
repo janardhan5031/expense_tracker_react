@@ -1,16 +1,49 @@
 import LayOut from './Components/Interface/LayOut';
 
-import AuthContextProvider from './Components/Store/AuthContext/AuthCtxProvider';
-import ExpenseContextProvider from './Components/Store/ExpenseContext/ExpenseCtxProvider';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { getUserDetails } from './Components/Store/Redux_store/auth_actions';
+import { getUserExpenses } from './Components/Store/Redux_store/expense_actions';
+
+import { authActions } from './Components/Store/Redux_store/authReducer';
+
+let initialState = true;
 
 function App() {
 
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth.auth)
+  const user = useSelector((state) => state.auth.user)
+  const totalExpenses = useSelector(state => state.expense.totalExpenses);
+
+  console.log(totalExpenses)
+
+  console.log(user)
+
+  useEffect(() => {
+    
+    if (totalExpenses >= 2000) {
+      dispatch(authActions.updateUserStatus())
+    }
+
+  },[totalExpenses])
+
+  useEffect(() => {
+
+    if (auth.isLogin && initialState ) {
+
+      dispatch(getUserDetails(auth))
+
+      dispatch(getUserExpenses())
+
+      initialState = false;
+    }
+
+  }, [ auth, dispatch])
+
   return (<>
-    <AuthContextProvider>
-      <ExpenseContextProvider>
-        <LayOut />
-      </ExpenseContextProvider>
-    </AuthContextProvider>
+    <LayOut />
   </>
   );
 }
