@@ -27,6 +27,9 @@ const LayOut = () => {
 
     // console.log(AuthCtx)
 
+    
+
+
     return (
         <BrowserRouter>
             <div style={layOutStyle}>
@@ -54,7 +57,7 @@ const LayOut = () => {
                         <Nav>
                             <Stack direction='horizontal' gap={3}>
                                 {auth.isLogin && !auth.isProfileCompleted && <Profile />}
-                                { user.isPremiumUser && <Button>Premium</Button>}
+                                {user.isPremiumUser && <Button>Premium</Button>}
                                 <LoginStatus />
                             </Stack>
                         </Nav>

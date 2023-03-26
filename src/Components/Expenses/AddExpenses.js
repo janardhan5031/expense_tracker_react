@@ -15,6 +15,12 @@ const styling = {
     margin:' 2rem 1rem'
 }
 
+const button_style = {
+    position: 'absolute',
+    right: "10%",
+    bottom:'15%'
+}
+
 const AddExpenses = () => {
 
     const [updateExp, setUpdateExp] = useState({isUpdate:false, id:undefined});
@@ -88,15 +94,34 @@ const AddExpenses = () => {
                 console.log(err)
             }            
         }
-        
+
         setFormValues({expense:'',description:''})    
 
     }
 
+    const makeCSV = (data) => {
+        data.unshift({expense:'Expense', description:'Description', type:'Type'})
+        const list = data.map((exp) => {
+            return [exp.expense, exp.description, exp.type].join(',')
+        }).join('\n')
+        // console.log(list)
+        return list;
+    }
+
+    const download_expenses = (e) => {
+        // console.log(e.target)
+        const a = e.target;
+        const blob = new Blob([makeCSV([...expenseList])])
+        a.href = URL.createObjectURL(blob)
+        
+    }   
     
     return <Stack direction="horizontal">
 
-        <ShowExpenseList styling={ styling} updateExpOnclick={updateExpOnclick} />
+        { expenseList.length && <Button style={button_style} onClick={download_expenses}><a download={'expenses.csv'}>Download</a></Button>}
+        
+
+        <ShowExpenseList styling={styling} updateExpOnclick={updateExpOnclick} />
 
         <InputModal style={styling}>
             <Form onSubmit={formSubmitHandler}>
