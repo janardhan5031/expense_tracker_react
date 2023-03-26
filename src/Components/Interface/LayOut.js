@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 import { Nav, Navbar, Stack, NavDropdown, Button } from "react-bootstrap";
 import userInterface from '../../assets/userInterface_bg.png';
+import dark from '../../assets/dark.png'
 import Profile from "../UserProfile/Profile";
 
 import UserAuth from '../Authentication/UserAuth';
@@ -11,23 +12,23 @@ import AddExpenses from '../Expenses/AddExpenses';
 
 import { useSelector } from 'react-redux';
 
-const layOutStyle = {
-    backgroundImage: `url(${userInterface})`,
-    height: '100vh',
-    backgroundSize: 'cover',
-    backgroundRepeat: 'no-repeat'
-}
 
 const LayOut = () => {
 
     const auth = useSelector((state) => state.auth.auth)
     const user = useSelector((state) => state.auth.user)
 
+    const layOutStyle = {
+        backgroundImage: user.isPremiumUser ? `url(${dark})` : `url(${userInterface})`,
+        height: '100vh',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat'
+    }
     // console.log(totalExpenses)
 
-    // console.log(AuthCtx)
+    console.log(user)
 
-    
+
 
 
     return (

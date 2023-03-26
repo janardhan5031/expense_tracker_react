@@ -18,9 +18,12 @@ const expenseSlice = createSlice({
 
         },
         removeExpense(state, actions) {
+            state.totalExpenses -= state.expenseList.find((exp) => exp.id === Number(actions.payload.id)).expense;
+            
             state.expenseList = state.expenseList.filter((exp) => {
                 return exp.id !== Number(actions.payload.id);
             }) 
+
         },
         updateExpense(state, actions) {
             state.expenseList = state.expenseList.map((exp) => {

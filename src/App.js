@@ -24,7 +24,10 @@ function App() {
   useEffect(() => {
     
     if (totalExpenses >= 2000) {
-      dispatch(authActions.updateUserStatus())
+      dispatch(authActions.updateUserStatus(true))
+    } else {
+      
+      dispatch(authActions.updateUserStatus(false))
     }
 
   },[totalExpenses])

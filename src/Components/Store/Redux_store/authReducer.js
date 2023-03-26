@@ -79,8 +79,9 @@ const authSlice = createSlice({
                 ...state.user, ...actions.payload
             }))
         },
-        updateUserStatus(status) {
-            status.user.isPremiumUser = true;
+        updateUserStatus(status, actions) {
+            console.log(actions.payload)
+            status.user.isPremiumUser = actions.payload;
         }
     }
 })
